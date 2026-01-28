@@ -108,6 +108,7 @@ export async function GET() {
         platform: topPerformingPost.platform,
         engagement: topPerformingPost.likes + topPerformingPost.comments + topPerformingPost.shares,
         thumbnail_url: topPerformingPost.thumbnail_url,
+        posted_at: topPerformingPost.posted_at,
       },
       trendPercentage: Math.round(Math.abs(trendPercentage) * 10) / 10,
       trendDirection,

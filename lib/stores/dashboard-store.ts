@@ -13,14 +13,15 @@ interface DashboardState {
   sortDirection: 'asc' | 'desc'
   setSortColumn: (column: string | null) => void
   setSortDirection: (direction: 'asc' | 'desc') => void
+  setSorting: (column: string | null, direction: 'asc' | 'desc') => void
 
   // Selected post for modal
   selectedPost: Post | null
   setSelectedPost: (post: Post | null) => void
 
   // Chart view type
-  chartViewType: 'line' | 'area'
-  setChartViewType: (type: 'line' | 'area') => void
+  chartViewType: 'line' | 'bar'
+  setChartViewType: (type: 'line' | 'bar') => void
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
@@ -33,12 +34,13 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   sortDirection: 'desc',
   setSortColumn: (column) => set({ sortColumn: column }),
   setSortDirection: (direction) => set({ sortDirection: direction }),
+  setSorting: (column, direction) => set({ sortColumn: column, sortDirection: direction }),
 
   // Selected post - ephemeral modal state
   selectedPost: null,
   setSelectedPost: (post) => set({ selectedPost: post }),
 
   // Chart view preference - UI state
-  chartViewType: 'area',
+  chartViewType: 'line',
   setChartViewType: (type) => set({ chartViewType: type }),
 }))

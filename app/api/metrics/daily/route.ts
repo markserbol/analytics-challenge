@@ -1,13 +1,27 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/lib/database.types'
 
 type DailyMetric = Database['public']['Tables']['daily_metrics']['Row']
 
-// Mark this route as an Edge Function
 export const runtime = 'edge'
 
 export async function GET(request: Request) {
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.headers.get('cookie')?.split(';').map(cookie => {
+            const [name, ...rest] = cookie.trim().split('=')
+            return { name, value: rest.join('=') }
+          }) ?? []
+        },
+        setAll() {},
+      },
+    }
+  )
   try {
     // Parse query parameters
     const { searchParams } = new URL(request.url)
@@ -21,8 +35,6 @@ export async function GET(request: Request) {
         { status: 400 }
       )
     }
-
-    const supabase = await createClient()
 
     // 1. Verify authentication
     const {
@@ -68,7 +80,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.json({
-        metrics: emptyMetrics,
+        data: emptyMetrics,
         days,
         isEmpty: true,
       })
@@ -99,7 +111,7 @@ export async function GET(request: Request) {
 
     // 6. Return the metrics
     return NextResponse.json({
-      metrics: completeMetrics,
+      data: completeMetrics,
       days,
       isEmpty: false,
     })

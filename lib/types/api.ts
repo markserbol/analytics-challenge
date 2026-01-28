@@ -9,6 +9,7 @@ export interface AnalyticsSummaryResponse {
     platform: 'instagram' | 'tiktok'
     engagement: number
     thumbnail_url: string | null
+    posted_at: string
   } | null
   trendPercentage: number
   trendDirection: 'up' | 'down' | 'neutral'
@@ -16,7 +17,7 @@ export interface AnalyticsSummaryResponse {
 }
 
 export interface DailyMetricsResponse {
-  metrics: Array<{
+  data: Array<{
     date: string
     engagement: number
     reach: number
