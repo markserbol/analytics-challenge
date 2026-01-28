@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '../supabase/client'
 import { Database } from '../database.types'
+import type { AnalyticsSummaryResponse, DailyMetricsResponse } from '../types/api'
 
 type Post = Database['public']['Tables']['posts']['Row']
-type DailyMetric = Database['public']['Tables']['daily_metrics']['Row']
 
 // Query Keys Factory Pattern
 export const queryKeys = {
@@ -11,12 +11,11 @@ export const queryKeys = {
     all: ['posts'] as const,
     filtered: (platform?: string) => ['posts', { platform }] as const,
   },
-  dailyMetrics: {
-    all: ['daily-metrics'] as const,
-    range: (days: number) => ['daily-metrics', { days }] as const,
-  },
   analytics: {
     summary: ['analytics', 'summary'] as const,
+  },
+  dailyMetricsApi: {
+    range: (days: number) => ['daily-metrics-api', { days }] as const,
   },
 }
 
@@ -44,36 +43,28 @@ export function usePosts(platform?: 'instagram' | 'tiktok') {
   })
 }
 
-// Fetch daily metrics for the last N days
-export function useDailyMetrics(days: number = 30) {
-  const supabase = createClient()
-
-  return useQuery({
-    queryKey: queryKeys.dailyMetrics.range(days),
-    queryFn: async () => {
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - days)
-
-      const { data, error } = await supabase
-        .from('daily_metrics')
-        .select('*')
-        .gte('date', startDate.toISOString().split('T')[0])
-        .order('date', { ascending: true })
-
-      if (error) throw error
-      return data as DailyMetric[]
-    },
-  })
-}
-
 // Fetch analytics summary from API route
 export function useAnalyticsSummary() {
-  return useQuery({
+  return useQuery<AnalyticsSummaryResponse>({
     queryKey: queryKeys.analytics.summary,
     queryFn: async () => {
       const response = await fetch('/api/analytics/summary')
       if (!response.ok) {
         throw new Error('Failed to fetch analytics summary')
+      }
+      return response.json()
+    },
+  })
+}
+
+// Fetch daily metrics from Edge API
+export function useDailyMetrics(days: number = 30) {
+  return useQuery<DailyMetricsResponse>({
+    queryKey: queryKeys.dailyMetricsApi.range(days),
+    queryFn: async () => {
+      const response = await fetch(`/api/metrics/daily?days=${days}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch daily metrics')
       }
       return response.json()
     },
