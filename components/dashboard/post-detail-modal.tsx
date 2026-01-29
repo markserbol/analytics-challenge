@@ -7,8 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { useDashboardStore } from '@/lib/stores/dashboard-store'
-import { Instagram, Video, Heart, MessageCircle, Share2, TrendingUp, Calendar } from 'lucide-react'
+import { Instagram, Video, Heart, MessageCircle, Share2, TrendingUp, Calendar, ExternalLink } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export function PostDetailModal() {
@@ -21,7 +22,7 @@ export function PostDetailModal() {
 
   return (
     <Dialog open={!!selectedPost} onOpenChange={(open) => !open && setSelectedPost(null)}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             {selectedPost.platform === 'instagram' ? (
@@ -47,6 +48,39 @@ export function PostDetailModal() {
             <h3 className="text-sm font-medium text-muted-foreground mb-2">Content</h3>
             <p className="text-base">{selectedPost.caption}</p>
           </div>
+
+          {/* Thumbnail */}
+          {selectedPost.thumbnail_url && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Preview</h3>
+              <img 
+                src={selectedPost.thumbnail_url} 
+                alt="Post thumbnail" 
+                className="w-full max-h-[400px] object-cover rounded-lg"
+              />
+            </div>
+          )}
+
+          {/* View on Platform Button */}
+          {selectedPost.permalink && (
+            <div>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                asChild
+              >
+                <a 
+                  href={selectedPost.permalink} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2"
+                >
+                  View on {selectedPost.platform === 'instagram' ? 'Instagram' : 'TikTok'}
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          )}
 
           {/* Engagement Stats */}
           <div>

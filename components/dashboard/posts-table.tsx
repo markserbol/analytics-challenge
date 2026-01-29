@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select'
 import { usePosts } from '@/lib/hooks/use-posts'
 import { useDashboardStore } from '@/lib/stores/dashboard-store'
-import { ArrowUpDown, Instagram, Video, Eye } from 'lucide-react'
+import { ArrowUpDown, Instagram, Video, ExternalLink } from 'lucide-react'
 import { Database } from '@/lib/database.types'
 
 type Post = Database['public']['Tables']['posts']['Row']
@@ -163,7 +163,11 @@ export function PostsTable() {
                 {sortedPosts.map((post) => {
                   const totalEngagement = post.likes + post.comments + post.shares
                   return (
-                    <TableRow key={post.id}>
+                    <TableRow 
+                      key={post.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedPost(post)}
+                    >
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {post.platform === 'instagram' ? (
@@ -192,13 +196,30 @@ export function PostsTable() {
                         {post.engagement_rate?.toFixed(2)}%
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedPost(post)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        {post.permalink ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                          >
+                            <a
+                              href={post.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled
+                          >
+                            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   )
