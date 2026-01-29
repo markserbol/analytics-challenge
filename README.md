@@ -4,7 +4,7 @@ A full-stack Next.js application for tracking social media engagement metrics ac
 
 ## 🚀 Live Demo
 
-[Vercel Deployment URL](https://your-deployment-url.vercel.app) *(Update after deployment)*
+[https://analytics-challenge-delta.vercel.app](https://analytics-challenge-delta.vercel.app)
 
 ## 📋 Table of Contents
 
