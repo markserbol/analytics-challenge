@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/lib/database.types'
+import { normalizePost } from '@/lib/types/normalize-post'
 
 type Post = Database['public']['Tables']['posts']['Row']
 
@@ -40,31 +41,25 @@ export async function GET() {
       })
     }
 
-    // Type assertion for posts array
-    const typedPosts = posts as Post[]
+    // Normalize posts to ensure non-nullable numeric fields
+    const normalizedPosts = (posts as Post[]).map(normalizePost)
 
     // 4. Calculate total engagement (likes + comments + shares)
-    const totalEngagement = typedPosts.reduce(
+    const totalEngagement = normalizedPosts.reduce(
       (sum, post) => sum + (post.likes + post.comments + post.shares),
       0
     )
 
     // 5. Calculate average engagement rate
-    const validEngagementRates = typedPosts
-      .filter((post) => post.engagement_rate !== null)
-      .map((post) => post.engagement_rate as number)
-
     const averageEngagementRate =
-      validEngagementRates.length > 0
-        ? validEngagementRates.reduce((sum, rate) => sum + rate, 0) / validEngagementRates.length
-        : 0
+      normalizedPosts.reduce((sum, post) => sum + post.engagement_rate, 0) / normalizedPosts.length
 
     // 6. Find top performing post (by total engagement)
-    const topPerformingPost = typedPosts.reduce((top, post) => {
+    const topPerformingPost = normalizedPosts.reduce((top, post) => {
       const postEngagement = post.likes + post.comments + post.shares
       const topEngagement = top.likes + top.comments + top.shares
       return postEngagement > topEngagement ? post : top
-    }, typedPosts[0])
+    }, normalizedPosts[0])
 
     // 7. Calculate trend (last 7 days vs previous 7 days)
     const now = new Date()
@@ -73,8 +68,8 @@ export async function GET() {
     const previous7Days = new Date(now)
     previous7Days.setDate(now.getDate() - 14)
 
-    const recentPosts = typedPosts.filter((post) => new Date(post.posted_at) >= last7Days)
-    const previousPosts = typedPosts.filter(
+    const recentPosts = normalizedPosts.filter((post) => new Date(post.posted_at) >= last7Days)
+    const previousPosts = normalizedPosts.filter(
       (post) => new Date(post.posted_at) >= previous7Days && new Date(post.posted_at) < last7Days
     )
 
@@ -112,7 +107,7 @@ export async function GET() {
       },
       trendPercentage: Math.round(Math.abs(trendPercentage) * 10) / 10,
       trendDirection,
-      postsCount: typedPosts.length,
+      postsCount: normalizedPosts.length,
     })
   } catch (error) {
     console.error('Error fetching analytics summary:', error)

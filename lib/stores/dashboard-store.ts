@@ -1,7 +1,5 @@
 import { create } from 'zustand'
-import { Database } from '../database.types'
-
-type Post = Database['public']['Tables']['posts']['Row']
+import type { NormalizedPost } from '../hooks/use-posts'
 
 interface DashboardState {
   // Platform filter state
@@ -16,8 +14,8 @@ interface DashboardState {
   setSorting: (column: string | null, direction: 'asc' | 'desc') => void
 
   // Selected post for modal
-  selectedPost: Post | null
-  setSelectedPost: (post: Post | null) => void
+  selectedPost: NormalizedPost | null
+  setSelectedPost: (post: NormalizedPost | null) => void
 
   // Chart view type
   chartViewType: 'line' | 'bar'

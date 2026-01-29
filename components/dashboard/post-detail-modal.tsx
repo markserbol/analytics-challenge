@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { useDashboardStore } from '@/lib/stores/dashboard-store'
 import { Instagram, Video, Heart, MessageCircle, Share2, TrendingUp, Calendar, ExternalLink } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export function PostDetailModal() {
   const selectedPost = useDashboardStore((state) => state.selectedPost)
@@ -21,9 +21,18 @@ export function PostDetailModal() {
   const totalEngagement = selectedPost.likes + selectedPost.comments + selectedPost.shares
 
   return (
-    <Dialog open={!!selectedPost} onOpenChange={(open) => !open && setSelectedPost(null)}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+    <AnimatePresence>
+      {selectedPost && (
+        <Dialog open={!!selectedPost} onOpenChange={(open) => !open && setSelectedPost(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="p-6"
+            >
+              <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             {selectedPost.platform === 'instagram' ? (
               <Instagram className="h-5 w-5 text-pink-600" />
@@ -157,7 +166,7 @@ export function PostDetailModal() {
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Engagement Rate</p>
                 </div>
-                <p className="text-2xl font-bold">{selectedPost.engagement_rate?.toFixed(2)}%</p>
+                <p className="text-2xl font-bold">{selectedPost.engagement_rate.toFixed(2)}%</p>
               </div>
               <div className="p-4 border rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
@@ -178,7 +187,10 @@ export function PostDetailModal() {
             </p>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </AnimatePresence>
   )
 }

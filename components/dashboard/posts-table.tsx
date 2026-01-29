@@ -18,12 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { usePosts } from '@/lib/hooks/use-posts'
+import { usePosts, NormalizedPost } from '@/lib/hooks/use-posts'
 import { useDashboardStore } from '@/lib/stores/dashboard-store'
 import { ArrowUpDown, Instagram, Video, ExternalLink } from 'lucide-react'
-import { Database } from '@/lib/database.types'
-
-type Post = Database['public']['Tables']['posts']['Row']
+import { motion } from 'framer-motion'
 
 export function PostsTable() {
   const platformFilter = useDashboardStore((state) => state.platformFilter)
@@ -53,8 +51,8 @@ export function PostsTable() {
         bValue = b.likes + b.comments + b.shares
         break
       case 'engagement_rate':
-        aValue = a.engagement_rate ?? 0
-        bValue = b.engagement_rate ?? 0
+        aValue = a.engagement_rate
+        bValue = b.engagement_rate
         break
       default:
         return 0
@@ -160,13 +158,20 @@ export function PostsTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedPosts.map((post) => {
+                {sortedPosts.map((post, index) => {
                   const totalEngagement = post.likes + post.comments + post.shares
                   return (
-                    <TableRow 
-                      key={post.id} 
-                      className="cursor-pointer hover:bg-muted/50"
+                    <motion.tr
+                      key={post.id}
+                      className="border-b transition-colors cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted"
                       onClick={() => setSelectedPost(post)}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.3, 
+                        delay: index * 0.05,
+                        ease: 'easeOut'
+                      }}
                     >
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -193,7 +198,7 @@ export function PostsTable() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {post.engagement_rate?.toFixed(2)}%
+                        {post.engagement_rate.toFixed(2)}%
                       </TableCell>
                       <TableCell>
                         {post.permalink ? (
@@ -221,7 +226,7 @@ export function PostsTable() {
                           </Button>
                         )}
                       </TableCell>
-                    </TableRow>
+                    </motion.tr>
                   )
                 })}
               </TableBody>

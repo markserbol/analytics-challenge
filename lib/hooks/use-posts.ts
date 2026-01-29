@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '../supabase/client'
 import { Database } from '../database.types'
 import type { AnalyticsSummaryResponse, DailyMetricsResponse } from '../types/api'
+import { normalizePost } from '../types/normalize-post'
+export type { NormalizedPost } from '../types/normalize-post'
 
 type Post = Database['public']['Tables']['posts']['Row']
 
@@ -38,7 +40,7 @@ export function usePosts(platform?: 'instagram' | 'tiktok') {
       const { data, error } = await query
 
       if (error) throw error
-      return data as Post[]
+      return (data as Post[]).map(normalizePost)
     },
   })
 }
@@ -78,10 +80,10 @@ export function useCreatePost() {
   return useMutation({
     mutationFn: async (post: Database['public']['Tables']['posts']['Insert']) => {
       const supabase = createClient()
-      // Type assertion needed due to Supabase client type inference issue
+      // Type assertion required: Supabase generated types have insert inference issues
       const { data, error } = await supabase
         .from('posts')
-        .insert(post as any)
+        .insert([post])
         .select()
         .single()
 

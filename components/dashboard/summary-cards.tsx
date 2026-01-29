@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAnalyticsSummary } from '@/lib/hooks/use-posts'
 import { TrendingUp, TrendingDown, Activity, Target, Trophy } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export function SummaryCards() {
   const { data: summary, isLoading, error } = useAnalyticsSummary()
@@ -77,7 +78,17 @@ export function SummaryCards() {
       {cards.map((card, index) => {
         const Icon = card.icon
         return (
-          <Card key={index}>
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.4, 
+              delay: index * 0.1,
+              ease: 'easeOut'
+            }}
+          >
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {card.title}
@@ -100,6 +111,7 @@ export function SummaryCards() {
               </div>
             </CardContent>
           </Card>
+          </motion.div>
         )
       })}
     </div>
